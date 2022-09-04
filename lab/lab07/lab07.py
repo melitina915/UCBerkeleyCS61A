@@ -1,182 +1,183 @@
-from ast import parse, NodeVisitor, Name
+def store_digits(n):
+    """Stores the digits of a positive number n in a linked list.
 
-# For error messages (student-facing) only
-_NAMES = {
-    'Add': '+',
-    'And': 'and',
-    'Assert': 'assert',
-    'Assign': '=',
-    'AnnAssign': '=',
-    'AugAssign': 'op=',
-    'BitAnd': '&',
-    'BitOr': '|',
-    'BitXor': '^',
-    'Break': 'break',
-    'Recursion': 'recursive call',
-    'ClassDef': 'class',
-    'Continue': 'continue',
-    'Del': 'del',
-    'Delete': 'delete',
-    'Dict': '{...}',
-    'DictComp': '{...}',
-    'Div': '/',
-    'Ellipsis': '...',
-    'Eq': '==',
-    'ExceptHandler': 'except',
-    'ExtSlice': '[::]',
-    'FloorDiv': '//',
-    'For': 'for',
-    'FunctionDef': 'def',
-    'Filter': 'filter',
-    'GeneratorExp': '(... for ...)',
-    'Global': 'global',
-    'Gt': '>',
-    'GtE': '>=',
-    'If': 'if',
-    'IfExp': '...if...else...',
-    'Import': 'import',
-    'ImportFrom': 'from ... import ...',
-    'In': 'in',
-    'Index': '...[...]',
-    'Invert': '~',
-    'Is': 'is',
-    'IsNot': 'is not ',
-    'LShift': '<<',
-    'Lambda': 'lambda',
-    'List': '[...]',
-    'ListComp': '[...for...]',
-    'Lt': '<',
-    'LtE': '<=',
-    'Mod': '%',
-    'Mult': '*',
-    'NamedExpr': ':=',
-    'Nonlocal': 'nonlocal',
-    'Not': 'not',
-    'NotEq': '!=',
-    'NotIn': 'not in',
-    'Or': 'or',
-    'Pass': 'pass',
-    'Pow': '**',
-    'RShift': '>>',
-    'Raise': 'raise',
-    'Return': 'return',
-    'Set': '{ ... } (set)',
-    'SetComp': '{ ... for ... } (set)',
-    'Slice': '[ : ]',
-    'Starred': '',
-    'Str': 'str',
-    'Sub': '-',
-    'Subscript': '[]',
-    'Try': 'try',
-    'Tuple': '(... , ... )',
-    'UAdd': '+',
-    'USub': '-',
-    'While': 'while',
-    'With': 'with',
-    'Yield': 'yield',
-    'YieldFrom': 'yield from',
-}
+    >>> s = store_digits(1)
+    >>> s
+    Link(1)
+    >>> store_digits(2345)
+    Link(2, Link(3, Link(4, Link(5))))
+    >>> store_digits(876)
+    Link(8, Link(7, Link(6)))
+    >>> # a check for restricted functions
+    >>> import inspect, re
+    >>> cleaned = re.sub(r"#.*\\n", '', re.sub(r'"{3}[\s\S]*?"{3}', '', inspect.getsource(store_digits)))
+    >>> print("Do not use str or reversed!") if any([r in cleaned for r in ["str", "reversed"]]) else None
+    >>> link1 = Link(3, Link(Link(4), Link(5, Link(6))))
+    """
+    "*** YOUR CODE HERE ***"
+    s = Link.empty
+    while n > 0:
+        s = Link(n % 10, s)
+        n //= 10
+    return s
 
 
-def check(source_file, checked_funcs, disallow, source=None):
-    """Checks that AST nodes whose type names are present in DISALLOW
-    (an object supporting 'in') are not present in the function(s) named
-    CHECKED_FUNCS in SOURCE.  By default, SOURCE is the contents of the
-    file SOURCE_FILE.  CHECKED_FUNCS is either a string (indicating a single
-    name) or an object of some other type that supports 'in'. CHECKED_FUNCS
-    may contain __main__ to indicate an entire  module. Prints reports of
-    each prohibited node and returns True iff none are found.
-    See ast.__dir__() for AST type names.  The special node name 'Recursion'
-    checks for overtly recursive calls (i.e., calls of the form NAME(...) where
-    NAME is an enclosing def."""
-    return ExclusionChecker(disallow).check(source_file, checked_funcs, source)
+def every_other(s):
+    """Mutates a linked list so that all the odd-indiced elements are removed
+    (using 0-based indexing).
+
+    >>> s = Link(1, Link(2, Link(3, Link(4))))
+    >>> every_other(s)
+    >>> s
+    Link(1, Link(3))
+    >>> odd_length = Link(5, Link(3, Link(1)))
+    >>> every_other(odd_length)
+    >>> odd_length
+    Link(5, Link(1))
+    >>> singleton = Link(4)
+    >>> every_other(singleton)
+    >>> singleton
+    Link(4)
+    """
+    "*** YOUR CODE HERE ***"
+    res, p = s, s.rest
+    i = 1
+    while p is not Link.empty:
+        if i % 2 == 1: 
+            res.rest = p.rest
+        res = p
+        p = p.rest
+        i += 1
 
 
-class ExclusionChecker(NodeVisitor):
-    """An AST visitor that checks that certain constructs are excluded from
-    parts of a program.  ExclusionChecker(EXC) checks that AST node types
-    whose names are in the sequence or set EXC are not present.  Its check
-    method visits nodes in a given function of a source file checking that the
-    indicated node types are not used."""
+def cumulative_mul(t):
+    """Mutates t so that each node's label becomes the product of all labels in
+    the corresponding subtree rooted at t.
 
-    def __init__(self, disallow=()):
-        """DISALLOW is the initial default list of disallowed
-        node-type names."""
-        self._disallow = set(disallow)
-        self._checking = False
-        self._errs = 0
+    >>> t = Tree(1, [Tree(3, [Tree(5)]), Tree(7)])
+    >>> cumulative_mul(t)
+    >>> t
+    Tree(105, [Tree(15, [Tree(5)]), Tree(7)])
+    >>> otherTree = Tree(2, [Tree(1, [Tree(3), Tree(4), Tree(5)]), Tree(6, [Tree(7)])])
+    >>> cumulative_mul(otherTree)
+    >>> otherTree
+    Tree(5040, [Tree(60, [Tree(3), Tree(4), Tree(5)]), Tree(42, [Tree(7)])])
+    """
+    "*** YOUR CODE HERE ***"
+    if t.is_leaf():
+        return
+    
+    for i in t.branches:
+        cumulative_mul(i)
+        
+        if isinstance(i, Tree):
+            t.label *= i.label
 
-    def generic_visit(self, node):
-        if self._checking and type(node).__name__ in self._disallow:
-            self._report(node)
-        super().generic_visit(node)
 
-    def visit_Module(self, node):
-        if "__main__" in self._checked_funcs:
-            self._checking = True
-            self._checked_name = self._source_file
-        super().generic_visit(node)
+def has_cycle(link):
+    """Return whether link contains a cycle.
 
-    def visit_Call(self, node):
-        if 'Recursion' in self._disallow and \
-           type(node.func) is Name and \
-           node.func.id in self._func_nest:
-            self._report(node, "should not be recursive")
-        self.generic_visit(node)
+    >>> s = Link(1, Link(2, Link(3)))
+    >>> s.rest.rest.rest = s
+    >>> has_cycle(s)
+    True
+    >>> t = Link(1, Link(2, Link(3)))
+    >>> has_cycle(t)
+    False
+    >>> u = Link(2, Link(2, Link(2)))
+    >>> has_cycle(u)
+    False
+    """
+    "*** YOUR CODE HERE ***"
 
-    def visit_FunctionDef(self, node):
-        self._func_nest.append(node.name)
-        if self._checking:
-            self.generic_visit(node)
-        elif node.name in self._checked_funcs:
-            self._checked_name = "Function " + node.name
-            checking0 = self._checking
-            self._checking = True
-            super().generic_visit(node)
-            self._checking = checking0
-        self._func_nest.pop()
 
-    def _report(self, node, msg=None):
-        node_name = _NAMES.get(type(node).__name__, type(node).__name__)
-        if msg is None:
-            msg = "should not contain '{}'".format(node_name)
-        print("{} {}".format(self._checked_name, msg))
-        self._errs += 1
+def has_cycle_constant(link):
+    """Return whether link contains a cycle.
 
-    def errors(self):
-        """Returns the number of number of prohibited constructs found in
-        the last call to check."""
-        return self._errs
+    >>> s = Link(1, Link(2, Link(3)))
+    >>> s.rest.rest.rest = s
+    >>> has_cycle_constant(s)
+    True
+    >>> t = Link(1, Link(2, Link(3)))
+    >>> has_cycle_constant(t)
+    False
+    """
+    "*** YOUR CODE HERE ***"
 
-    def check(self, source_file, checked_funcs, disallow=None, source=None):
-        """Checks that AST nodes whose type names are present in DISALLOW
-        (an object supporting the contains test) are not present in
-        the function(s) named CHECKED_FUNCS in SOURCE.  By default, SOURCE
-        is the contents of the file SOURCE_FILE.  DISALLOW defaults to the
-        argument given to the constructor (and resets that value if it is
-        present).  CHECKED_FUNCS is either a string (indicating a single
-        name) or an object of some other type that supports 'in'.
-        CHECKED_FUNCS may contain __main__ to indicate an entire module.
-        Prints reports of each prohibited node and returns True iff none
-        are found.
-        See ast.__dir__() for AST type names.  The special node name
-        'Recursion' checks for overtly recursive calls (i.e., calls of the
-        form NAME(...) where NAME is an enclosing def."""
 
-        self._checking = False
-        self._source_file = source_file
-        self._func_nest = []
-        if type(checked_funcs) is str:
-            self._checked_funcs = {checked_funcs}
+class Link:
+    """A linked list.
+
+    >>> s = Link(1)
+    >>> s.first
+    1
+    >>> s.rest is Link.empty
+    True
+    >>> s = Link(2, Link(3, Link(4)))
+    >>> s.first = 5
+    >>> s.rest.first = 6
+    >>> s.rest.rest = Link.empty
+    >>> s                                    # Displays the contents of repr(s)
+    Link(5, Link(6))
+    >>> s.rest = Link(7, Link(Link(8, Link(9))))
+    >>> s
+    Link(5, Link(7, Link(Link(8, Link(9)))))
+    >>> print(s)                             # Prints str(s)
+    <5 7 <8 9>>
+    """
+    empty = ()
+
+    def __init__(self, first, rest=empty):
+        assert rest is Link.empty or isinstance(rest, Link)
+        self.first = first
+        self.rest = rest
+
+    def __repr__(self):
+        if self.rest is not Link.empty:
+            rest_repr = ', ' + repr(self.rest)
         else:
-            self._checked_funcs = set(checked_funcs)
-        if disallow is not None:
-            self._disallow = set(disallow)
-        if source is None:
-            with open(source_file, 'r', errors='ignore') as inp:
-                source = inp.read()
-        p = parse(source, source_file)
-        self._errs = 0
+            rest_repr = ''
+        return 'Link(' + repr(self.first) + rest_repr + ')'
 
-        self.visit(p)
-        return self._errs == 0
+    def __str__(self):
+        string = '<'
+        while self.rest is not Link.empty:
+            string += str(self.first) + ' '
+            self = self.rest
+        return string + str(self.first) + '>'
+
+
+class Tree:
+    """
+    >>> t = Tree(3, [Tree(2, [Tree(5)]), Tree(4)])
+    >>> t.label
+    3
+    >>> t.branches[0].label
+    2
+    >>> t.branches[1].is_leaf()
+    True
+    """
+
+    def __init__(self, label, branches=[]):
+        for b in branches:
+            assert isinstance(b, Tree)
+        self.label = label
+        self.branches = list(branches)
+
+    def is_leaf(self):
+        return not self.branches
+
+    def __repr__(self):
+        if self.branches:
+            branch_str = ', ' + repr(self.branches)
+        else:
+            branch_str = ''
+        return 'Tree({0}{1})'.format(self.label, branch_str)
+
+    def __str__(self):
+        def print_tree(t, indent=0):
+            tree_str = '  ' * indent + str(t.label) + "\n"
+            for b in t.branches:
+                tree_str += print_tree(b, indent + 1)
+            return tree_str
+        return print_tree(self).rstrip()
